@@ -56,11 +56,28 @@ function HomeComponent() {
                     <div>
                         <h2>Providing Quality Video Call Just Like Quality Education by TAN</h2>
 
-                        <div style={{ display: 'flex', gap: "10px" }}>
+                        <div style={{ display: 'flex', gap: "10px", marginBottom: "20px" }}>
 
                             <TextField onChange={e => setMeetingCode(e.target.value)} id="outlined-basic" label="Meeting Code" variant="outlined" />
                             <Button onClick={handleJoinVideoCall} variant='contained'>Join</Button>
 
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: "10px" }}>
+                            <Button 
+                                onClick={() => navigate('/video-chat')} 
+                                variant='contained' 
+                                color='primary'
+                                size='large'
+                                sx={{ 
+                                    minWidth: '200px',
+                                    height: '50px',
+                                    fontSize: '16px',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Create New Meeting
+                            </Button>
                         </div>
                     </div>
                 </div>
