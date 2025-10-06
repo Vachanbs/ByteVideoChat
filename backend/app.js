@@ -2,9 +2,13 @@ import express from "express";
 import { createServer } from "node:http";
 import mongoose from "mongoose";
 import cors from "cors";
+import dotenv from "dotenv";
 
 import { connectToSocket } from "./src/controllers/socketManager.js";
 import userRoutes from "./src/routes/users.routes.js";
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 const server = createServer(app);
@@ -16,8 +20,12 @@ const io = connectToSocket(server);
 const PORT = process.env.PORT || 8000;
 
 // ✅ Enable CORS (VERY IMPORTANT: whitelist your frontend domain)
+const corsOrigins = process.env.CORS_ORIGINS 
+  ? process.env.CORS_ORIGINS.split(',')
+  : ["https://bytevideochat.vercel.app", "http://localhost:3000"];
+
 app.use(cors({
-  origin: ["https://bytevideochat.vercel.app", "http://localhost:3000"], // add both prod + dev
+  origin: corsOrigins,
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 }));
@@ -32,9 +40,10 @@ app.use("/api/v1/users", userRoutes);
 // ✅ Start server + connect DB
 const start = async () => {
   try {
-    const connectionDb = await mongoose.connect(
-      "mongodb+srv://tanushr20:Tanush@chatbot.kdrvim3.mongodb.net/?retryWrites=true&w=majority&appName=ChatBot"
-    );
+    const mongoUri = process.env.MONGODB_URI || 
+      "mongodb+srv://tanushr20:Tanush@chatbot.kdrvim3.mongodb.net/?retryWrites=true&w=majority&appName=ChatBot";
+    
+    const connectionDb = await mongoose.connect(mongoUri);
 
     console.log(`✅ MongoDB Connected: ${connectionDb.connection.host}`);
 
