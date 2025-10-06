@@ -68,6 +68,13 @@ export default function VideoChat() {
   
   // Socket ref
   const socketRef = useRef(null);
+  
+  // Audio recording refs
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const microphoneRef = useRef(null);
 
   // Create theme based on mode
   const theme = createTheme({
@@ -149,6 +156,102 @@ export default function VideoChat() {
       setMessages(prev => [...prev, messageData]);
       setNewMessageCount(prev => prev + 1);
     });
+
+    // Listen for voice messages
+    socketRef.current.on('voice-message', (audioData, sender) => {
+      playVoiceMessage(audioData, sender);
+    });
+  };
+
+  const startVoiceRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // Create MediaRecorder for voice messages
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        sendVoiceMessage(audioBlob);
+      };
+
+      // Start recording
+      mediaRecorderRef.current.start();
+      
+      // Set up audio context for real-time audio processing
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      microphoneRef.current = audioContextRef.current.createMediaStreamSource(stream);
+      
+      microphoneRef.current.connect(analyserRef.current);
+      
+      console.log('Voice recording started');
+    } catch (error) {
+      console.error('Error starting voice recording:', error);
+    }
+  };
+
+  const stopVoiceRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+    
+    // Clean up audio context
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    
+    console.log('Voice recording stopped');
+  };
+
+  const sendVoiceMessage = (audioBlob) => {
+    if (socketRef.current && audioBlob.size > 0) {
+      // Convert blob to base64 for transmission
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64Audio = reader.result;
+        socketRef.current.emit('voice-message', base64Audio, 'You');
+        
+        // Add voice message to chat
+        const voiceMessage = {
+          sender: 'You',
+          data: '🎤 Voice message',
+          timestamp: new Date().toLocaleTimeString(),
+          isVoice: true,
+          audioData: base64Audio
+        };
+        setMessages(prev => [...prev, voiceMessage]);
+      };
+      reader.readAsDataURL(audioBlob);
+    }
+  };
+
+  const playVoiceMessage = (audioData, sender) => {
+    try {
+      const audio = new Audio(audioData);
+      audio.play();
+      
+      // Add voice message to chat
+      const voiceMessage = {
+        sender,
+        data: '🎤 Voice message',
+        timestamp: new Date().toLocaleTimeString(),
+        isVoice: true,
+        audioData: audioData
+      };
+      setMessages(prev => [...prev, voiceMessage]);
+      setNewMessageCount(prev => prev + 1);
+    } catch (error) {
+      console.error('Error playing voice message:', error);
+    }
   };
 
   const handleVideoToggle = () => {
@@ -165,7 +268,7 @@ export default function VideoChat() {
     }
   };
 
-  const handleAudioToggle = () => {
+  const handleAudioToggle = async () => {
     if (localVideoRef.current && localVideoRef.current.srcObject) {
       const stream = localVideoRef.current.srcObject;
       const audioTrack = stream.getAudioTracks()[0];
@@ -173,9 +276,21 @@ export default function VideoChat() {
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
         setIsAudioOn(audioTrack.enabled);
+        
+        // Start/stop voice chat recording
+        if (audioTrack.enabled) {
+          await startVoiceRecording();
+        } else {
+          stopVoiceRecording();
+        }
       }
     } else {
       setIsAudioOn(!isAudioOn);
+      if (isAudioOn) {
+        await startVoiceRecording();
+      } else {
+        stopVoiceRecording();
+      }
     }
   };
 
@@ -214,6 +329,14 @@ export default function VideoChat() {
     // Stop all media tracks
     if (localVideoRef.current && localVideoRef.current.srcObject) {
       localVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
+    }
+    
+    // Stop voice recording
+    stopVoiceRecording();
+    
+    // Clean up audio context
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
     }
     
     // Disconnect socket
@@ -441,14 +564,50 @@ export default function VideoChat() {
                         >
                           {message.sender}
                         </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: message.sender === 'You' ? 'primary.contrastText' : 'text.primary',
-                          }}
-                        >
-                          {message.data}
-                        </Typography>
+                        {message.isVoice ? (
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: message.sender === 'You' ? 'primary.contrastText' : 'text.primary',
+                              }}
+                            >
+                              {message.data}
+                            </Typography>
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                const audio = new Audio(message.audioData);
+                                audio.play();
+                              }}
+                              sx={{
+                                color: message.sender === 'You' ? 'primary.contrastText' : 'primary.main',
+                                backgroundColor: message.sender === 'You' ? 'rgba(255,255,255,0.2)' : 'primary.light',
+                                '&:hover': {
+                                  backgroundColor: message.sender === 'You' ? 'rgba(255,255,255,0.3)' : 'primary.main',
+                                  color: 'primary.contrastText',
+                                },
+                              }}
+                            >
+                              ▶️
+                            </IconButton>
+                          </Box>
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: message.sender === 'You' ? 'primary.contrastText' : 'text.primary',
+                            }}
+                          >
+                            {message.data}
+                          </Typography>
+                        )}
                         <Typography
                           variant="caption"
                           sx={{
@@ -557,6 +716,24 @@ export default function VideoChat() {
                       },
                     }}
                   />
+                  <IconButton
+                    onClick={async () => {
+                      if (isAudioOn) {
+                        await startVoiceRecording();
+                        setTimeout(() => {
+                          stopVoiceRecording();
+                        }, 3000); // Record for 3 seconds
+                      }
+                    }}
+                    disabled={!isAudioOn}
+                    size="small"
+                    sx={{
+                      color: isAudioOn ? 'primary.main' : 'text.disabled',
+                      backgroundColor: isAudioOn ? 'primary.light' : 'background.default',
+                    }}
+                  >
+                    🎤
+                  </IconButton>
                   <Button
                     variant="contained"
                     onClick={handleSendMessage}
