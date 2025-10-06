@@ -53,11 +53,11 @@ npm install
 ### 3. Environment Setup
 
 #### Backend Environment Variables
-Create a `.env` file in the `backend` directory:
+Create a `.env` file in the `backend` directory (use your own values; do not commit secrets):
 ```env
 NODE_ENV=development
 PORT=8000
-MONGODB_URI=mongodb+srv://vachanbs21:O4jBjdN3HeqqGvGp@byte.ulqcs6e.mongodb.net/?retryWrites=true&w=majority&appName=BYTE
+MONGODB_URI=<your-mongodb-uri>
 CORS_ORIGINS=http://localhost:3000
 ```
 

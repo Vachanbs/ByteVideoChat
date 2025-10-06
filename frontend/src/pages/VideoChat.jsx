@@ -145,6 +145,10 @@ export default function VideoChat() {
     
     socketRef.current.on('connect', () => {
       console.log('Connected to server');
+      // Join a room based on current URL so broadcasting works
+      try {
+        socketRef.current.emit('join-call', window.location.href);
+      } catch {}
     });
     
     socketRef.current.on('chat-message', (data, sender) => {

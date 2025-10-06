@@ -13,16 +13,15 @@ dotenv.config();
 const app = express();
 const server = createServer(app);
 
-// ✅ Connect socket.io
-const io = connectToSocket(server);
-
-// ✅ Port
+// ✅ Port and CORS origins
 const PORT = process.env.PORT || 8000;
+const corsOrigins = (process.env.CORS_ORIGINS || "https://bytevideochat.vercel.app,http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
-// ✅ Enable CORS (VERY IMPORTANT: whitelist your frontend domain)
-const corsOrigins = process.env.CORS_ORIGINS 
-  ? process.env.CORS_ORIGINS.split(',')
-  : ["https://bytevideochat.vercel.app", "http://localhost:3000"];
+// ✅ Connect socket.io with restricted CORS
+const io = connectToSocket(server, corsOrigins);
 
 app.use(cors({
   origin: corsOrigins,
@@ -40,8 +39,11 @@ app.use("/api/v1/users", userRoutes);
 // ✅ Start server + connect DB
 const start = async () => {
   try {
-    const mongoUri = process.env.MONGODB_URI || 
-      "mongodb+srv://vachanbs21:O4jBjdN3HeqqGvGp@byte.ulqcs6e.mongodb.net/?retryWrites=true&w=majority&appName=BYTE";
+    const mongoUri = process.env.MONGODB_URI;
+    if (!mongoUri) {
+      console.error("MONGODB_URI is not set. Please set it in your environment.");
+      process.exit(1);
+    }
     
     const connectionDb = await mongoose.connect(mongoUri);
 

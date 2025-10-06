@@ -5,12 +5,11 @@ let connections = {}
 let messages = {}
 let timeOnline = {}
 
-export const connectToSocket = (server) => {
+export const connectToSocket = (server, allowedOrigins) => {
     const io = new Server(server, {
         cors: {
-            origin: "*",
+            origin: allowedOrigins,
             methods: ["GET", "POST"],
-            allowedHeaders: ["*"],
             credentials: true
         }
     });
@@ -77,6 +76,23 @@ export const connectToSocket = (server) => {
                 })
             }
 
+        })
+
+        // Broadcast base64 voice messages to all peers in the same room
+        socket.on("voice-message", (audioData, sender) => {
+            const [matchingRoom, found] = Object.entries(connections)
+                .reduce(([room, isFound], [roomKey, roomValue]) => {
+                    if (!isFound && roomValue.includes(socket.id)) {
+                        return [roomKey, true];
+                    }
+                    return [room, isFound];
+                }, ['', false]);
+
+            if (found === true) {
+                connections[matchingRoom].forEach((peerSocketId) => {
+                    io.to(peerSocketId).emit("voice-message", audioData, sender, socket.id)
+                })
+            }
         })
 
         socket.on("disconnect", () => {
