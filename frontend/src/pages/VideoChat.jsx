@@ -362,6 +362,21 @@ export default function VideoChat() {
           flexDirection: 'column',
           backgroundColor: 'background.default',
           color: 'text.primary',
+          backgroundImage: 'url(/background.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.8)',
+            zIndex: 0,
+          },
         }}
       >
         {/* Header */}
@@ -373,10 +388,14 @@ export default function VideoChat() {
             p: 2,
             borderBottom: 1,
             borderColor: 'divider',
+            position: 'relative',
+            zIndex: 1,
+            backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.3)',
+            backdropFilter: 'blur(10px)',
           }}
         >
           <Typography variant="h6" component="h1">
-            {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+            {isDarkMode ? 'Video Chat' : 'Video Chat'}
           </Typography>
           
               <FormControlLabel
@@ -404,6 +423,7 @@ export default function VideoChat() {
             display: 'flex',
             position: 'relative',
             overflow: 'hidden',
+            zIndex: 1,
           }}
         >
           {/* Video Grid */}
@@ -429,6 +449,8 @@ export default function VideoChat() {
                 border: 2,
                 borderColor: 'divider',
                 mb: 2,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                backdropFilter: 'blur(10px)',
               }}
             >
               <video
@@ -462,6 +484,8 @@ export default function VideoChat() {
                   overflow: 'hidden',
                   border: 2,
                   borderColor: 'divider',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+                  backdropFilter: 'blur(10px)',
                 }}
               >
                 <video
@@ -484,6 +508,8 @@ export default function VideoChat() {
                   overflow: 'hidden',
                   border: 2,
                   borderColor: 'divider',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+                  backdropFilter: 'blur(10px)',
                 }}
               >
                 <video
@@ -504,12 +530,14 @@ export default function VideoChat() {
             <Box
               sx={{
                 width: '300px',
-                backgroundColor: 'background.paper',
+                backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.8)',
                 borderLeft: 1,
                 borderColor: 'divider',
                 display: 'flex',
                 flexDirection: 'column',
                 height: '100%',
+                backdropFilter: 'blur(15px)',
+                boxShadow: '0 0 20px rgba(0, 0, 0, 0.3)',
               }}
             >
               <Box
@@ -760,9 +788,12 @@ export default function VideoChat() {
             flexDirection: 'column',
             alignItems: 'center',
             gap: 2,
-            backgroundColor: 'background.paper',
+            backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.3)',
             borderTop: 1,
             borderColor: 'divider',
+            position: 'relative',
+            zIndex: 1,
+            backdropFilter: 'blur(10px)',
           }}
         >
           {/* Control Buttons */}
