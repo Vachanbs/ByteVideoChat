@@ -97,9 +97,23 @@ export default function VideoChat() {
       
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
+        
+        // Set initial states based on actual stream tracks
+        const videoTrack = stream.getVideoTracks()[0];
+        const audioTrack = stream.getAudioTracks()[0];
+        
+        if (videoTrack) {
+          setIsVideoOn(videoTrack.enabled);
+        }
+        if (audioTrack) {
+          setIsAudioOn(audioTrack.enabled);
+        }
       }
     } catch (error) {
       console.error('Error accessing media devices:', error);
+      // Set states to false if permission denied
+      setIsVideoOn(false);
+      setIsAudioOn(false);
     }
   };
 
@@ -117,13 +131,31 @@ export default function VideoChat() {
   };
 
   const handleVideoToggle = () => {
-    setIsVideoOn(!isVideoOn);
-    // Implement video toggle logic
+    if (localVideoRef.current && localVideoRef.current.srcObject) {
+      const stream = localVideoRef.current.srcObject;
+      const videoTrack = stream.getVideoTracks()[0];
+      
+      if (videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled;
+        setIsVideoOn(videoTrack.enabled);
+      }
+    } else {
+      setIsVideoOn(!isVideoOn);
+    }
   };
 
   const handleAudioToggle = () => {
-    setIsAudioOn(!isAudioOn);
-    // Implement audio toggle logic
+    if (localVideoRef.current && localVideoRef.current.srcObject) {
+      const stream = localVideoRef.current.srcObject;
+      const audioTrack = stream.getAudioTracks()[0];
+      
+      if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        setIsAudioOn(audioTrack.enabled);
+      }
+    } else {
+      setIsAudioOn(!isAudioOn);
+    }
   };
 
   const handleScreenShare = () => {
