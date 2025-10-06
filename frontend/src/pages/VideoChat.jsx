@@ -197,22 +197,22 @@ export default function VideoChat() {
             {isDarkMode ? 'Dark Mode' : 'Light Mode'}
           </Typography>
           
-          <FormControlLabel
-            control={
-              <Switch
-                checked={isDarkMode}
-                onChange={handleThemeToggle}
-                icon={<WbSunnyIcon />}
-                checkedIcon={<DarkModeIcon />}
-                sx={{
-                  '& .MuiSwitch-thumb': {
-                    backgroundColor: isDarkMode ? '#90caf9' : '#ffa726',
-                  },
-                }}
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isDarkMode}
+                    onChange={handleThemeToggle}
+                    icon={<WbSunnyIcon sx={{ color: '#FFA500' }} />}
+                    checkedIcon={<DarkModeIcon />}
+                    sx={{
+                      '& .MuiSwitch-thumb': {
+                        backgroundColor: isDarkMode ? '#90caf9' : '#ffa726',
+                      },
+                    }}
+                  />
+                }
+                label=""
               />
-            }
-            label=""
-          />
         </Box>
 
         {/* Main Content */}
