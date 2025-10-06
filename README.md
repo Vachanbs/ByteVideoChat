@@ -57,7 +57,7 @@ Create a `.env` file in the `backend` directory:
 ```env
 NODE_ENV=development
 PORT=8000
-MONGODB_URI=mongodb+srv://tanushr20:Tanush@chatbot.kdrvim3.mongodb.net/?retryWrites=true&w=majority&appName=ChatBot
+MONGODB_URI=mongodb+srv://vachanbs21:<db_password>@byte.ulqcs6e.mongodb.net/?retryWrites=true&w=majority&appName=BYTE
 CORS_ORIGINS=http://localhost:3000
 ```
 

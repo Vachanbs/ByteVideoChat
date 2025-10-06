@@ -41,7 +41,7 @@ app.use("/api/v1/users", userRoutes);
 const start = async () => {
   try {
     const mongoUri = process.env.MONGODB_URI || 
-      "mongodb+srv://tanushr20:Tanush@chatbot.kdrvim3.mongodb.net/?retryWrites=true&w=majority&appName=ChatBot";
+      "mongodb+srv://vachanbs21:<db_password>@byte.ulqcs6e.mongodb.net/?retryWrites=true&w=majority&appName=BYTE";
     
     const connectionDb = await mongoose.connect(mongoUri);
 

@@ -57,7 +57,7 @@ After deployment, Vercel will provide you with a URL (e.g., `https://your-app.ve
 ### Step 2: Set Environment Variables
 In Render dashboard, go to your service → Environment tab and add:
 - `NODE_ENV`: `production`
-- `MONGODB_URI`: `mongodb+srv://tanushr20:Tanush@chatbot.kdrvim3.mongodb.net/?retryWrites=true&w=majority&appName=ChatBot`
+- `MONGODB_URI`: `mongodb+srv://vachanbs21:<db_password>@byte.ulqcs6e.mongodb.net/?retryWrites=true&w=majority&appName=BYTE`
 - `CORS_ORIGINS`: `https://your-frontend-url.vercel.app,http://localhost:3000`
 
 ### Step 3: Deploy
