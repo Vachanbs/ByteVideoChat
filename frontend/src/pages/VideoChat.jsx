@@ -42,7 +42,23 @@ export default function VideoChat() {
   // Chat states
   const [showChat, setShowChat] = useState(false);
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([
+    {
+      sender: 'Assatnion',
+      data: 'Hello everyone! How is the meeting going?',
+      timestamp: '10:30 AM'
+    },
+    {
+      sender: 'Onsane',
+      data: 'Great! The video quality is excellent.',
+      timestamp: '10:31 AM'
+    },
+    {
+      sender: 'You',
+      data: 'Thanks for joining everyone!',
+      timestamp: '10:32 AM'
+    }
+  ]);
   const [newMessageCount, setNewMessageCount] = useState(0);
   
   // Video refs
@@ -125,7 +141,12 @@ export default function VideoChat() {
     });
     
     socketRef.current.on('chat-message', (data, sender) => {
-      setMessages(prev => [...prev, { sender, data }]);
+      const messageData = {
+        sender,
+        data,
+        timestamp: new Date().toLocaleTimeString()
+      };
+      setMessages(prev => [...prev, messageData]);
       setNewMessageCount(prev => prev + 1);
     });
   };
@@ -177,8 +198,14 @@ export default function VideoChat() {
 
   const handleSendMessage = () => {
     if (message.trim() && socketRef.current) {
+      const messageData = {
+        sender: 'You',
+        data: message,
+        timestamp: new Date().toLocaleTimeString()
+      };
+      
       socketRef.current.emit('chat-message', message, 'You');
-      setMessages(prev => [...prev, { sender: 'You', data: message }]);
+      setMessages(prev => [...prev, messageData]);
       setMessage('');
     }
   };
@@ -379,40 +406,170 @@ export default function VideoChat() {
                   flex: 1,
                   p: 2,
                   overflow: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column',
                 }}
               >
-                {participants.map((participant) => (
-                  <Box
-                    key={participant.id}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      mb: 1,
-                      p: 1,
-                      borderRadius: 1,
-                      backgroundColor: 'background.default',
-                    }}
-                  >
-                    <Box
+                {/* Messages Display */}
+                <Box
+                  sx={{
+                    flex: 1,
+                    overflow: 'auto',
+                    mb: 2,
+                    maxHeight: '300px',
+                  }}
+                >
+                  {messages.length > 0 ? (
+                    messages.map((message, index) => (
+                      <Box
+                        key={index}
+                        sx={{
+                          mb: 2,
+                          p: 1,
+                          borderRadius: 1,
+                          backgroundColor: message.sender === 'You' ? 'primary.light' : 'background.default',
+                          alignSelf: message.sender === 'You' ? 'flex-end' : 'flex-start',
+                          maxWidth: '80%',
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontWeight: 'bold',
+                            color: message.sender === 'You' ? 'primary.contrastText' : 'text.secondary',
+                          }}
+                        >
+                          {message.sender}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: message.sender === 'You' ? 'primary.contrastText' : 'text.primary',
+                          }}
+                        >
+                          {message.data}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: message.sender === 'You' ? 'primary.contrastText' : 'text.secondary',
+                            fontSize: '0.7rem',
+                          }}
+                        >
+                          {message.timestamp}
+                        </Typography>
+                      </Box>
+                    ))
+                  ) : (
+                    <Typography
+                      variant="body2"
                       sx={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: '50%',
-                        backgroundColor: 'primary.main',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        mr: 1,
-                        color: 'primary.contrastText',
-                        fontSize: '0.8rem',
-                        fontWeight: 'bold',
+                        color: 'text.secondary',
+                        textAlign: 'center',
+                        mt: 2,
                       }}
                     >
-                      {participant.name.charAt(0)}
+                      No messages yet. Start the conversation!
+                    </Typography>
+                  )}
+                </Box>
+
+                {/* Participants List */}
+                <Box
+                  sx={{
+                    borderTop: 1,
+                    borderColor: 'divider',
+                    pt: 2,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      mb: 1,
+                      color: 'text.secondary',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Participants
+                  </Typography>
+                  {participants.map((participant) => (
+                    <Box
+                      key={participant.id}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        mb: 1,
+                        p: 1,
+                        borderRadius: 1,
+                        backgroundColor: 'background.default',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: '50%',
+                          backgroundColor: 'primary.main',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          mr: 1,
+                          color: 'primary.contrastText',
+                          fontSize: '0.7rem',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        {participant.name.charAt(0)}
+                      </Box>
+                      <Typography variant="caption">{participant.name}</Typography>
                     </Box>
-                    <Typography variant="body2">{participant.name}</Typography>
-                  </Box>
-                ))}
+                  ))}
+                </Box>
+              </Box>
+
+              {/* Chat Input */}
+              <Box
+                sx={{
+                  p: 2,
+                  borderTop: 1,
+                  borderColor: 'divider',
+                  backgroundColor: 'background.paper',
+                }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    gap: 1,
+                    alignItems: 'center',
+                  }}
+                >
+                  <TextField
+                    fullWidth
+                    placeholder="Type a message..."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    size="small"
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        fontSize: '0.875rem',
+                      },
+                    }}
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={handleSendMessage}
+                    disabled={!message.trim()}
+                    size="small"
+                    sx={{
+                      minWidth: '60px',
+                      height: '32px',
+                    }}
+                  >
+                    Send
+                  </Button>
+                </Box>
               </Box>
             </Box>
           )}
