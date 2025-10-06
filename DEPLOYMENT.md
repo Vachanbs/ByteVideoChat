@@ -57,7 +57,7 @@ After deployment, Vercel will provide you with a URL (e.g., `https://your-app.ve
 ### Step 2: Set Environment Variables
 In Render dashboard, go to your service → Environment tab and add:
 - `NODE_ENV`: `production`
-- `MONGODB_URI`: `mongodb+srv://vachanbs21:O4jBjdN3HeqqGvGp@byte.ulqcs6e.mongodb.net/?retryWrites=true&w=majority&appName=BYTE`
+- `MONGODB_URI`: `<your-mongodb-uri>`
 - `CORS_ORIGINS`: `https://your-frontend-url.vercel.app,http://localhost:3000`
 
 ### Step 3: Deploy
@@ -71,9 +71,8 @@ Click "Create Web Service" to deploy your backend.
    ```javascript
    let IS_PROD = true;
    const server = IS_PROD ?
-       "https://your-backend-url.onrender.com/" :
-       "http://localhost:8000"
-   
+       "https://your-backend-url.onrender.com" :
+       "http://localhost:8000";
    export default server;
    ```
 
